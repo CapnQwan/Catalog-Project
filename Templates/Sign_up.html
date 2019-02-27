@@ -1,0 +1,34 @@
+{% extends "header.html" %}
+{% block content %}
+<form action="#" method="post">
+	<div class="row padding-top">
+		<div class="col-3"></div>
+		<div class="col-6">
+			<label for="name">Username:</label>
+			<input type ="text" maxlength="40" class="form-control" name="username" placeholder="Enter your username here">
+		</div>
+		<div class="col-3"></div>
+	</div>
+	<div class="row">
+		<div class="col-3"></div>
+		<div class="col-6">
+			<label for="name">Password:</label>
+			<input type ="password" maxlength="40" class="form-control" name="password" placeholder="password">
+		</div>
+		<div class="col-3"></div>
+	</div>
+	<div class="row">
+		<div class="col-3"></div>
+		<div class="col-6">
+			<label for="name">Email:</label>
+			<input type ="text" maxlength="40" class="form-control" name="email" placeholder="example@something.com">
+		</div>
+		<div class="col-3"></div>
+	</div>
+	<div class="row ten-mrg-top">
+		<div class="col">
+			<button type="submit" class="btn btn-primary">Sign Up</button>
+		</div>
+	</div>
+</form>
+{% endblock %}
