@@ -1,8 +1,10 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, jsonify, json, redirect, g
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from DB_setup import Base, User
 from flask.ext.httpauth import HTTPBasicAuth
+import requests
+from flask import session as login_session
 
 
 app = Flask(__name__)
@@ -17,31 +19,52 @@ session = DBSession()
 @app.route('/')
 @app.route('/Corvus')
 def homepage():
+	print(login_session['Username'])
 	return render_template('front_page.html')
 
 
-@app.route('/Corvus/login')
+@app.route('/Corvus/login', methods = ['GET', 'POST'])
 def Login():
-	return render_template('Login.html')
+	if  request.method == 'POST':
+		username = request.form['username']
+		password = request.form['password']
+		if username is None or password is None:
+			return render_template('Login.html')
+		userlogin = session.query(User).filter_by(username=username).first()
+		if not userlogin or not userlogin.verify_password(password):
+			print(userlogin)
+			return render_template('Sign_up.html')
+		else:
+			g.userlogin = userlogin
+			token = g.userlogin.generate_auth_token()
+			login_session['Username'] = username
+			login_session['Usertoken'] = token
+			return redirect(url_for('homepage'))
+	else:	
+		return render_template('Login.html')
 
 
 @app.route('/Corvus/signup', methods = ['GET', 'POST'])
 def Signup():
 	if request.method == 'POST':
-		username = request.json.get('username')
-		password = request.json.get('password')
-		email = request.json.get('email')
-		if username in None or password is None:
-			render_template('Signup.html')
+		username = request.form['username']
+		password = request.form['password']
+		email = request.form['email']
+		if username is None or password is None or email is None:
+			return render_template('Sign_up.html')
 
-		if session.query(User).filter_by(username=username).first is not None:
-			render_template('Signup.html')
+		if session.query(User).filter_by(username=username).first() is not None:
+			return render_template('Sign_up.html')
 
 		user = User(username = username, email = email)
 		user.hash_password(password)
 		session.add(user)
 		session.commit()
-		return redirect(url_for('/Corvus'))
+		g.userlogin = user
+		token = g.user.generate_auth_token()
+		login_session['Username'] = username
+		login_session['Usertoken'] = token
+		return redirect(url_for('homepage'))
 	else:
 		return render_template('Sign_up.html')
 
