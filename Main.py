@@ -19,8 +19,11 @@ session = DBSession()
 @app.route('/')
 @app.route('/Corvus')
 def homepage():
-	print(login_session['Username'])
-	return render_template('front_page.html')
+	try:
+		print(login_session['Username'])
+		return render_template('front_page.html')
+	except:
+		return render_template('front_page.html')
 
 
 @app.route('/Corvus/login', methods = ['GET', 'POST'])
@@ -33,7 +36,7 @@ def Login():
 		userlogin = session.query(User).filter_by(username=username).first()
 		if not userlogin or not userlogin.verify_password(password):
 			print(userlogin)
-			return render_template('Sign_up.html')
+			return render_template('Login.html')
 		else:
 			g.userlogin = userlogin
 			token = g.userlogin.generate_auth_token()
@@ -60,13 +63,19 @@ def Signup():
 		user.hash_password(password)
 		session.add(user)
 		session.commit()
-		g.userlogin = user
+		g.user = user
 		token = g.user.generate_auth_token()
 		login_session['Username'] = username
 		login_session['Usertoken'] = token
 		return redirect(url_for('homepage'))
 	else:
 		return render_template('Sign_up.html')
+
+@app.route('/Corvus/Logout')
+def Logout():
+	del login_session['Username']
+	del login_session['Usertoken']
+	return redirect(url_for('homepage'))
 
 
 if __name__ == '__main__':
