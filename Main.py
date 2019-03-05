@@ -152,6 +152,25 @@ def EditItem(item_id):
 		return redirect(url_for('Login'))
 
 
+@app.route('/Corvus/Item/<int:item_id>/Del', methods=["GET", "POST"])
+def DelItem(item_id):
+	delete_item = session.query(CatalogItem).filter_by(id=item_id).one()
+	try:
+		t = login_session['Usertoken']
+		user_id = User.verify_auth_token(t)
+		if user_id == delete_item.user_id:
+			if request.method == 'POST':
+				session.delete(delete_item)
+				session.commit
+				return redirect(url_for('homepage'))
+			else:
+				return render_template('Delete_item.html', item=delete_item)
+		else:
+			return redirect(url_for('Login'))
+	except:
+		return redirect(url_for('Login'))
+
+
 #this was added as i struck a problem with the newitem function so this was there to test the token
 @app.route('/token')
 def get_auth_token():
