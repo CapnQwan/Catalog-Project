@@ -1,8 +1,8 @@
 import random, string
 from sqlalchemy.ext.declarative import declarative_base
 from passlib.apps import custom_app_context as pwd_context
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship
 from itsdangerous import(TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 
@@ -40,6 +40,16 @@ class User(Base):
     		return None
     	user_id = data['id']
     	return user_id
+
+
+class CatalogItem(Base):
+    __tablename__ = 'catalog_item'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(40), nullable = False)
+    catagory = Column(String(30), nullable = False)
+    description = Column(String(250))
+    price = Column(String(12), nullable = False)
+    user_id = Column(Integer, ForeignKey('User.id'))
 
 
 engine = create_engine('sqlite:///Catalog.db')
