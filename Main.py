@@ -192,6 +192,12 @@ def ItemJSON(item_id):
 	return jsonify(items=item.serialize)
 
 
+@app.route('/Corvus/JSON')
+def ItemsJSON():
+	items = session.query(CatalogItem).all()
+	return jsonify(items=[i.serialize for i in items])
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
