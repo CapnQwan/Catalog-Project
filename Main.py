@@ -186,6 +186,12 @@ def get_auth_token():
     return jsonify({'token': token.decode('ascii')})
 
 
+@app.route('/Corvus/Item/<int:item_id>/JSON')
+def ItemJSON(item_id):
+	item = session.query(CatalogItem).filter_by(id=item_id).one()
+	return jsonify(items=item.serialize)
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True

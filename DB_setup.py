@@ -34,10 +34,8 @@ class User(Base):
     	try:
     		data = s.loads(token)
     	except SignatureExpired:
-    		#Valid Token, but expired
     		return None
     	except BadSignature:
-    		#Invalid Token
     		return None
     	user_id = data['id']
     	return user_id
@@ -54,6 +52,16 @@ class CatalogItem(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
+    @property
+    def serialize(self):
+       return {
+           'Id'   :self.id,
+           'Name'   : self.name,
+           'Catagory'   : self.catagory,
+           'Description'   : self.description,
+           'Price'   : self.price,
+           'user_id'   : self.user_id,
+       }
 
 engine = create_engine('sqlite:///Catalog.db')
 
