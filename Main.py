@@ -94,7 +94,7 @@ def Newitem():
 				session.add(newitem)
 				session.commit()
 				print('item added')
-				return redirect(url_for('homepage'))
+				return redirect(url_for('ViewItem', item_id=newitem.id))
 			else: 
 				print('must be logged in')
 				return redirect(url_for('signup'))
