@@ -109,7 +109,15 @@ def Newitem():
 @app.route('/Corvus/Item/<int:item_id>/')
 def ViewItem(item_id):
 	item = session.query(CatalogItem).filter_by(id=item_id).one()
-	return render_template('item.html', item=item)
+	try:
+		t = login_session['Usertoken']
+		user_id = User.verify_auth_token(t)
+		if user_id == item.user_id:
+			return render_template('Owner_item.html', item=item)
+		else:
+			return render_template('item.html', item=item)
+	except:
+		return render_template('item.html', item=item)
 
 
 @app.route('/Corvus/catagory/<string:catagory_Type>')
