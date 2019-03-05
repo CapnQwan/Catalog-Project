@@ -108,6 +108,7 @@ def Newitem():
 @app.route('/Corvus/Item/<int:item_id>/')
 def ViewItem(item_id):
 	item = session.query(CatalogItem).filter_by(id=item_id).one()
+	usersitem = session.query(User).filter_by(id=item.user_id).one()
 	try:
 		t = login_session['Usertoken']
 		user_id = User.verify_auth_token(t)
@@ -116,7 +117,7 @@ def ViewItem(item_id):
 		else:
 			return render_template('item.html', item=item)
 	except:
-		return render_template('item.html', item=item)
+		return render_template('item.html', item=item, useritem=usersitem)
 
 
 @app.route('/Corvus/catagory/<string:catagory_Type>')
@@ -161,7 +162,7 @@ def DelItem(item_id):
 		if user_id == delete_item.user_id:
 			if request.method == 'POST':
 				session.delete(delete_item)
-				session.commit
+				session.commit()
 				return redirect(url_for('homepage'))
 			else:
 				return render_template('Delete_item.html', item=delete_item)
@@ -169,6 +170,13 @@ def DelItem(item_id):
 			return redirect(url_for('Login'))
 	except:
 		return redirect(url_for('Login'))
+
+
+@app.route('/Corvus/User/<int:User_id>')
+def UsersUploads(User_id):
+	items = session.query(CatalogItem).filter_by(user_id=User_id).all()
+	user = session.query(User).filter_by(id=User_id).one()
+	return render_template('Users_items.html', items=items, user=user)
 
 
 #this was added as i struck a problem with the newitem function so this was there to test the token
