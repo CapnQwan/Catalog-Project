@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, request, jsonify, json, redirect, g
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from DB_setup import Base, User
+from DB_setup import Base, User, CatalogItem
 from flask.ext.httpauth import HTTPBasicAuth
 import requests
 from flask import session as login_session
@@ -35,11 +35,9 @@ def Login():
 			return render_template('Login.html')
 		userlogin = session.query(User).filter_by(username=username).first()
 		if not userlogin or not userlogin.verify_password(password):
-			print(userlogin)
 			return render_template('Login.html')
 		else:
-			g.userlogin = userlogin
-			token = g.userlogin.generate_auth_token()
+			token = userlogin.generate_auth_token()
 			login_session['Username'] = username
 			login_session['Usertoken'] = token
 			return redirect(url_for('homepage'))
@@ -76,6 +74,38 @@ def Logout():
 	del login_session['Username']
 	del login_session['Usertoken']
 	return redirect(url_for('homepage'))
+
+@app.route('/Corvus/Newitem', methods = ['GET', 'POST'])
+def Newitem():
+	try:
+		t = login_session['Usertoken']
+		user_id = User.verify_auth_token(t)
+		print(user_id)
+		if request.method == 'POST':
+			if user_id:
+				name = request.form['Name']
+				desc = request.form['description']
+				price = request.form['price']
+				catagory = request.form['catagory']
+				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id)
+				session.add(newitem)
+				session.commit()
+				print('item added')
+				return redirect(url_for('homepage'))
+			else: 
+				print('must be logged in')
+				return redirect(url_for('signup'))
+		else:
+		
+			return render_template('New_item.html')
+	except:
+		print('invalid token')
+		return redirect(url_for('homepage'))
+
+@app.route('/token')
+def get_auth_token():
+    token = login_session['token']
+    return jsonify({'token': token.decode('ascii')})
 
 
 if __name__ == '__main__':

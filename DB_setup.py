@@ -12,6 +12,7 @@ secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for x
 
 class User(Base):
     __tablename__ = 'user'
+
     id = Column(Integer, primary_key=True)
     username = Column(String(32), index=True)
     password_hash = Column(String(64))
@@ -34,22 +35,24 @@ class User(Base):
     		data = s.loads(token)
     	except SignatureExpired:
     		#Valid Token, but expired
-    		return None
+    		return none
     	except BadSignature:
     		#Invalid Token
-    		return None
+    		return none
     	user_id = data['id']
     	return user_id
 
 
 class CatalogItem(Base):
     __tablename__ = 'catalog_item'
+
     id = Column(Integer, primary_key = True)
     name = Column(String(40), nullable = False)
     catagory = Column(String(30), nullable = False)
     description = Column(String(250))
     price = Column(String(12), nullable = False)
-    user_id = Column(Integer, ForeignKey('User.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
 
 engine = create_engine('sqlite:///Catalog.db')

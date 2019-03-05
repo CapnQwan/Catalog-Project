@@ -1,0 +1,46 @@
+{% extends "header.html" %}
+{% block content %}
+<form action="#" method="post">
+	<div class="row padding-top">
+		<div class="col">
+			<label for="name">Name:</label>
+			<input type ="text" maxlength="40" class="form-control" name="Name" placeholder="Name of the product">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<label for="Desc">Description:</label>
+			<textarea class="form-control" name="description">Description of the product</textarea>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<label for="Price">Price:</label>
+			<input type ="text" maxlength="12" class="form-control" name="price" placeholder="$">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<label for="exampleFormControlSelect1">Catagory:</label>
+		    <select class="form-control" id="exampleFormControlSelect1" name="catagory">
+		      	<option value="Motherboards">Motherboards</option>
+		      	<option value="CPUs">CPUs</option>
+		      	<option value="RAM">RAM</option>
+		      	<option value="Graphics Cards">Graphics Cards</option>
+		      	<option value="HDD, SSD, M.2">HDD, SSD, M.2</option>
+		      	<option value="Power Supplies">Power Supplies</option>
+		      	<option value="Cases">Cases</option>
+		      	<option value="peripherals">peripherals</option>
+		      	<option value="Cooling">Cooling</option>
+		      	<option value="Optical Drives">Optical Drives</option>
+		      	<option value="Other Pci Cards">Other Pci Cards</option>
+		    </select>
+		</div>
+	</div>
+	<div class="row ten-mrg-top">
+		<div class="col">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</div>
+</form>
+{% endblock %}
