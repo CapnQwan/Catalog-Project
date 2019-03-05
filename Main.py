@@ -105,6 +105,18 @@ def Newitem():
 		return redirect(url_for('homepage'))
 
 
+@app.route('/Corvus/Profile')
+def Profile():
+	try:
+		t = login_session['Usertoken']
+		user_id = User.verify_auth_token(t)
+		items = session.query(CatalogItem).filter_by(user_id=user_id).all()
+		user = session.query(User).filter_by(id=user_id).one()
+		return render_template('Users_items.html', items=items, user=user)
+	except:
+		return redirect(url_for('Login'))	
+
+
 @app.route('/Corvus/Item/<int:item_id>/')
 def ViewItem(item_id):
 	item = session.query(CatalogItem).filter_by(id=item_id).one()
