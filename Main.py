@@ -105,6 +105,12 @@ def Newitem():
 		print('invalid token')
 		return redirect(url_for('homepage'))
 
+@app.route('/Corvus/Item/<int:item_id>/')
+def ViewItem(item_id):
+	item = session.query(CatalogItem).filter_by(id=item_id).one()
+	return render_template('item.html', item=item)
+
+#this was added as i struck a problem with the newitem function so this was there to test the token
 @app.route('/token')
 def get_auth_token():
     token = login_session['token']
