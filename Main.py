@@ -131,25 +131,25 @@ def ViewCatagory(catagory_Type):
 @app.route('/Corvus/Item/<int:item_id>/Edit', methods = ['GET', 'POST'])
 def EditItem(item_id):
 	edit_item = session.query(CatalogItem).filter_by(id=item_id).one()
-	#try:
-	t = login_session['Usertoken']
-	user_id = User.verify_auth_token(t)
-	if user_id == edit_item.user_id:
-		if request.method == 'POST':
-			if request.form['Name'] and request.form['price'] and request.form['description']:
-				edit_item.name = request.form['Name']
-				edit_item.price = request.form['price']
-				edit_item.catagory = request.form['catagory']
-				edit_item.description = request.form['description']
-				return redirect(url_for('ViewItem', item_id=edit_item.id))
+	try:
+		t = login_session['Usertoken']
+		user_id = User.verify_auth_token(t)
+		if user_id == edit_item.user_id:
+			if request.method == 'POST':
+				if request.form['Name'] and request.form['price'] and request.form['description']:
+					edit_item.name = request.form['Name']
+					edit_item.price = request.form['price']
+					edit_item.catagory = request.form['catagory']
+					edit_item.description = request.form['description']
+					return redirect(url_for('ViewItem', item_id=edit_item.id))
+				else:
+					return render_template('Edit_item.html', item=edit_item)
 			else:
 				return render_template('Edit_item.html', item=edit_item)
 		else:
-			return render_template('Edit_item.html', item=edit_item)
-	else:
+			return redirect(url_for('Login'))
+	except:
 		return redirect(url_for('Login'))
-	#except:
-		#return redirect(url_for('Login'))
 
 
 #this was added as i struck a problem with the newitem function so this was there to test the token
