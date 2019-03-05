@@ -71,9 +71,12 @@ def Signup():
 
 @app.route('/Corvus/Logout')
 def Logout():
-	del login_session['Username']
-	del login_session['Usertoken']
-	return redirect(url_for('homepage'))
+	try:
+		del login_session['Username']
+		del login_session['Usertoken']
+		return redirect(url_for('homepage'))
+	except:
+		return redirect(url_for('homepage'))
 
 @app.route('/Corvus/Newitem', methods = ['GET', 'POST'])
 def Newitem():
