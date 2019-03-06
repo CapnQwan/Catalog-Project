@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, request, jsonify, json, redirect, make_response, g
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from DB_setup import Base, User, CatalogItem
 from flask.ext.httpauth import HTTPBasicAuth
@@ -21,11 +21,12 @@ session = DBSession()
 @app.route('/')
 @app.route('/Corvus')
 def homepage():
+	items = session.query(CatalogItem).order_by(desc(CatalogItem.View)).limit(4).all()
 	try:
 		print(login_session['Username'])
-		return render_template('front_page.html')
+		return render_template('front_page.html', items=items)
 	except:
-		return render_template('front_page.html')
+		return render_template('front_page.html', items=items)
 
 
 @app.route('/Corvus/login', methods = ['GET', 'POST'])
@@ -143,7 +144,7 @@ def gconnect():
         session.add(Newuser)
         session.commit()
         login_session['user_id'] = Newuser.id
-    return output
+    return redirect(url_for('homepage'))
 
 
 @app.route('/Corvus/signup', methods = ['GET', 'POST'])
@@ -172,20 +173,16 @@ def Signup():
 
 @app.route('/Corvus/Logout')
 def Logout():
-	if 'provider' in login_session:
-		print('1')
-		if login_session['provider'] == 'google':
-			print('2')
+	if login_session['provider'] == 'google':
+			print('1')
 			gdisconnect()
-			return redirect(url_for('homepage'))
 			#return redirect('https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=http://localhost:5000/Corvus')
-	else:
-		try:
-			del login_session['Username']
-			del login_session['Usertoken']
-			return redirect(url_for('homepage'))
-		except:
-			return redirect(url_for('homepage'))
+	try:
+		del login_session['Username']
+		del login_session['Usertoken']
+		return redirect(url_for('homepage'))
+	except:
+		return redirect(url_for('homepage'))
 
 
 @app.route('/gdisconnect')
@@ -232,7 +229,8 @@ def Newitem():
 				desc = request.form['description']
 				price = request.form['price']
 				catagory = request.form['catagory']
-				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id)
+				views = 0
+				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id, View=views)
 				session.add(newitem)
 				session.commit()
 				print('item added')
@@ -269,6 +267,9 @@ def ViewItem(item_id):
 		if user_id == item.user_id:
 			return render_template('Owner_item.html', item=item)
 		else:
+			views = item.View
+			views = views + 1
+			item.View = views
 			return render_template('item.html', item=item, useritem=usersitem)
 	except:
 		return render_template('item.html', item=item, useritem=usersitem)

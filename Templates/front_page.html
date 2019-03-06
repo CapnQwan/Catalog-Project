@@ -48,7 +48,7 @@
 	<div class="col-3">
 		<a href="/Corvus/catagory/peripherals">
 			<img src="static/images/coding.svg" class="icon" alt="peripherals icon">
-			<h4 class="catagory-link">peripherals</h4>
+			<h4 class="catagory-link">Peripherals</h4>
 		</a>
 	</div>
 </div>
@@ -77,5 +77,18 @@
 			<h4 class="catagory-link">All products</h4>
 		</a>
 	</div>
+</div>
+<div class="row padding-top">
+	<h4>Most viewed products</h4>
+</div>
+
+<div class="row">
+	{% for item in items %}
+	<div class="col-3">
+		<a href="{{url_for('ViewItem', catagory=catagory, item_id=item.id)}}">
+		{{item.name}}
+		</a>
+	</div>
+{% endfor %}
 </div>
 {% endblock %}
