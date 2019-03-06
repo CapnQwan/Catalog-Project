@@ -297,8 +297,6 @@ def EditItem(item_id):
 					edit_item.catagory = request.form['catagory']
 					edit_item.description = request.form['description']
 					return redirect(url_for('ViewItem', item_id=edit_item.id))
-				else:
-					return render_template('Edit_item.html', item=edit_item)
 			else:
 				return render_template('Edit_item.html', item=edit_item)
 		else:
