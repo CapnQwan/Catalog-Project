@@ -1,5 +1,5 @@
 .padding-top {
-	padding-top: 72px;
+	padding-top: 90px;
 }
 
 .mrg-bot {
@@ -16,4 +16,15 @@
 
 .catagory-link {
   text-align: center;
+}
+
+.center-text{
+	text-align: center;
+}
+
+.frontpage-image {
+	width: 150px;
+	height: 150px;
+	margin-left: calc(50% - 75px);
+	margin-right: calc(50% - 75px);
 }

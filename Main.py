@@ -3,12 +3,19 @@ from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from DB_setup import Base, User, CatalogItem
 from flask.ext.httpauth import HTTPBasicAuth
-import requests, httplib2, json, string, random
+import requests, httplib2, json, string, random, os
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
+from werkzeug.utils import secure_filename
+
+
+UPLOAD_FOLDER = 'static/Item-image'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 
@@ -43,6 +50,7 @@ def Login():
 			token = userlogin.generate_auth_token()
 			login_session['Username'] = username
 			login_session['Usertoken'] = token
+			login_session['provider'] = 'Corvus'
 			return redirect(url_for('homepage'))
 	else:
 		state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
@@ -167,23 +175,31 @@ def Signup():
 		token = g.user.generate_auth_token()
 		login_session['Username'] = username
 		login_session['Usertoken'] = token
+		login_session['provider'] = 'Corvus'
 		return redirect(url_for('homepage'))
 	else:
 		return render_template('Sign_up.html')
 
 @app.route('/Corvus/Logout')
 def Logout():
-	if login_session['provider'] == 'google':
+	try: 
+		if login_session['provider'] == Corvus:
+			del login_session['Username']
+			del login_session['Usertoken']
+		elif login_session['provider'] == google:
 			print('1')
 			gdisconnect()
-			#return redirect('https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=http://localhost:5000/Corvus')
-	try:
-		del login_session['Username']
-		del login_session['Usertoken']
 		return redirect(url_for('homepage'))
 	except:
 		return redirect(url_for('homepage'))
-
+try:
+	pass
+except Exception as e:
+	raise
+else:
+	pass
+finally:
+	pass
 
 @app.route('/gdisconnect')
 def gdisconnect():
@@ -217,32 +233,45 @@ def gdisconnect():
         return response
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
 @app.route('/Corvus/Newitem', methods = ['GET', 'POST'])
 def Newitem():
-	try:
-		t = login_session['Usertoken']
-		user_id = User.verify_auth_token(t)
-		print(user_id)
-		if request.method == 'POST':
-			if user_id:
-				name = request.form['Name']
-				desc = request.form['description']
-				price = request.form['price']
-				catagory = request.form['catagory']
+	#try:
+	t = login_session['Usertoken']
+	user_id = User.verify_auth_token(t)
+	print(user_id)
+	if request.method == 'POST':
+		if user_id:
+			name = request.form['Name']
+			desc = request.form['description']
+			price = request.form['price']
+			catagory = request.form['catagory']
+			file = request.files['file']
+			if file.filename == '':
+				return redirect(url_for('Newitem'))
+			if file and allowed_file(file.filename):
+				filename = secure_filename(file.filename)
+				file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 				views = 0
-				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id, View=views)
+				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id, View=views, filename=filename)
 				session.add(newitem)
 				session.commit()
 				print('item added')
 				return redirect(url_for('ViewItem', item_id=newitem.id))
-			else: 
-				print('must be logged in')
-				return redirect(url_for('signup'))
-		else:
-			return render_template('New_item.html')
-	except:
-		print('invalid token')
-		return redirect(url_for('homepage'))
+			return redirect(url_for('Newitem'))
+		else: 
+			print('must be logged in')
+			return redirect(url_for('Signup'))
+	else:
+		return render_template('New_item.html')
+	#except:
+		#print('invalid token')
+		#return redirect(url_for('homepage'))
 
 
 @app.route('/Corvus/Profile')

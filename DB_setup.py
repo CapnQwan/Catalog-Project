@@ -50,6 +50,7 @@ class CatalogItem(Base):
     description = Column(String(250))
     price = Column(String(12), nullable = False)
     View = Column(Integer, nullable = False)
+    filename = Column(String, nullable = False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
