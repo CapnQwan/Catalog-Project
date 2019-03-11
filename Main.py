@@ -9,7 +9,7 @@ from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 from werkzeug.utils import secure_filename
 
 
-UPLOAD_FOLDER = 'static/Item-image'
+UPLOAD_FOLDER = 'static/Upload images'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -280,7 +280,14 @@ def Profile():
 				user.description = request.form['description']
 				return render_template('Profile.html', items=items, user=user)	
 			elif formname == 'form2':
-				return render_template('Profile.html', items=items, user=user)	
+				file = request.files['file']
+				if file.filename == '':
+					return render_template('profile.html', items=items, user=user)
+				if file and allowed_file(file.filename):
+					filename = secure_filename(file.filename)
+					file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+					user.profilepic = filename
+					return render_template('Profile.html', items=items, user=user)	
 		return render_template('Profile.html', items=items, user=user)
 	except:
 		return redirect(url_for('Login'))	

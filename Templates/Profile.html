@@ -3,11 +3,38 @@
 <div class="row padding-top">
 	<div class="col-3">
 		<div class="row">
-			{% if user.profilepic == None %}
-				<img class="Profile-picture" src="/static/images/profile-placeholder.png">
-			{% else %}
-				<img class="Profile-picture" src="{{user.profilepic}}">
-			{% endif %}
+      <div class="modal fade" id="modalProfilePic" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header text-center">
+                  <h4 class="modal-title w-100 font-weight-bold">Update Profile Pic</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form action="#" method="post" enctype=multipart/form-data>
+                  <input type="hidden" name="form-name" value="form2">
+                <div class="modal-body mx-3">
+                  <div class="md-form mb-5">
+                      <i class="fas fa-envelope prefix grey-text"></i>
+                      <label for="Desc">Profile pic:</label>
+                      <p><input type=file name=file>
+                    </div>
+                  </div>
+                  <div class="modal-footer d-flex justify-content-center">
+                    <button class="btn btn-default" type="submit">Update</button>
+                  </div>
+                </form>
+            </div>
+          </div>
+      </div>
+      <a href="" class="btn btn-default btn-rounded mb-4" data-toggle="modal" data-target="#modalProfilePic">
+		    {% if user.profilepic == None %}
+				  <img class="Profile-picture" src="/static/images/profile-placeholder.png">
+		    {% else %}
+				  <img class="Profile-picture" src="/static/Upload images/{{user.profilepic}}">
+		    {% endif %}
+      </a>
 		</div>	
 		<div class="row">
 			<h4>{{user.username}}</h4>
@@ -17,35 +44,34 @@
 {% if user.description != None %}
 {{user.description}}
 {% endif %}
-<div class="modal fade" id="modalLoginForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+<div class="modal fade" id="modalDescUpdate" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
 	aria-hidden="true">
 	<div class="modal-dialog" role="document">
-    	<div class="modal-content">
-    		<div class="modal-header text-center">
-        		<h4 class="modal-title w-100 font-weight-bold">Update description</h4>
-    			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          			<span aria-hidden="true">&times;</span>
-        		</button>
+    <div class="modal-content">
+    	<div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Update description</h4>
+    		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    	<form action="#" method="post">
+    		<input type="hidden" name="form-name" value="form1">
+   			<div class="modal-body mx-3">
+  				<div class="md-form mb-5">
+       			<i class="fas fa-envelope prefix grey-text"></i>
+      			<label for="Desc">Description:</label>
+					  <textarea class="form-control" name="description">Description</textarea>
       		</div>
-      		<form action="#" method="post">
-      			<input type="hidden" name="form-name" value="form1">
-     			<div class="modal-body mx-3">
-    				<div class="md-form mb-5">
-        				<i class="fas fa-envelope prefix grey-text"></i>
-        				<label for="Desc">Description:</label>
-						<textarea class="form-control" name="description">Description</textarea>
-        			</div>
-      			</div>
-      			<div class="modal-footer d-flex justify-content-center">
-        			<button class="btn btn-default">Update</button>
-      			</div>
-      		</form>
-    	</div>
+    		</div>
+    		<div class="modal-footer d-flex justify-content-center">
+      		<button class="btn btn-default" type="submit">Update</button>
+    		</div>
+    	</form>
   	</div>
+	</div>
 </div>
-
 <div class="text-center">
-  <a href="" class="btn btn-default btn-rounded mb-4" data-toggle="modal" data-target="#modalLoginForm">update description</a>
+  <a href="" class="btn btn-default btn-rounded mb-4" data-toggle="modal" data-target="#modalDescUpdate">update description</a>
 </div>
 <hr>
 {% for item in items %}
