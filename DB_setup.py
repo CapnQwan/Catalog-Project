@@ -17,6 +17,8 @@ class User(Base):
     username = Column(String(32), index=True)
     password_hash = Column(String(64))
     email = Column(String(32))
+    profilepic = Column(String())
+    description = Column(String(255))
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)

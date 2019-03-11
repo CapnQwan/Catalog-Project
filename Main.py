@@ -148,7 +148,7 @@ def gconnect():
     except:
     	user = None
     if not user:
-        Newuser = User(username = login_session['Username'], email = login_session['email'])
+        Newuser = User(username = login_session['Username'], email = login_session['email'], profilepic = login_session)
         session.add(Newuser)
         session.commit()
         login_session['user_id'] = Newuser.id
@@ -183,23 +183,16 @@ def Signup():
 @app.route('/Corvus/Logout')
 def Logout():
 	try: 
-		if login_session['provider'] == Corvus:
+		if login_session['provider'] == 'Corvus':
 			del login_session['Username']
 			del login_session['Usertoken']
-		elif login_session['provider'] == google:
+		elif login_session['provider'] == 'google':
 			print('1')
 			gdisconnect()
 		return redirect(url_for('homepage'))
 	except:
 		return redirect(url_for('homepage'))
-try:
-	pass
-except Exception as e:
-	raise
-else:
-	pass
-finally:
-	pass
+
 
 @app.route('/gdisconnect')
 def gdisconnect():
@@ -274,14 +267,21 @@ def Newitem():
 		#return redirect(url_for('homepage'))
 
 
-@app.route('/Corvus/Profile')
+@app.route('/Corvus/Profile', methods = ['GET', 'POST'])
 def Profile():
 	try:
 		t = login_session['Usertoken']
 		user_id = User.verify_auth_token(t)
 		items = session.query(CatalogItem).filter_by(user_id=user_id).all()
 		user = session.query(User).filter_by(id=user_id).one()
-		return render_template('Users_items.html', items=items, user=user)
+		if request.method == 'POST':
+			formname = request.form['form-name']
+			if formname == 'form1':
+				user.description = request.form['description']
+				return render_template('Profile.html', items=items, user=user)	
+			elif formname == 'form2':
+				return render_template('Profile.html', items=items, user=user)	
+		return render_template('Profile.html', items=items, user=user)
 	except:
 		return redirect(url_for('Login'))	
 

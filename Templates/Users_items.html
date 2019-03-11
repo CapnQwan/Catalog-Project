@@ -1,7 +1,11 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="row padding-top">
-	<div class="col-6">{{user.username}}</div>
+	<div class="col-3">{{user.profilepic}}</div>
+	<div class="col-3"><h4>{{user.username}}</h4></div>
+</div>
+<div class="row">
+	<h5>{{user.description}}</h5>
 </div>
 {% for item in items %}
 <a href="{{url_for('ViewItem', catagory=catagory, item_id=item.id)}}">
