@@ -25,27 +25,37 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+def testlogin():
+	try:
+		u = login_session['Username']
+		return u 
+	except:
+		return None
+
+
 @app.route('/')
 @app.route('/Corvus')
 def homepage():
+	userlogin = testlogin()
 	items = session.query(CatalogItem).order_by(desc(CatalogItem.View)).limit(4).all()
 	try:
 		print(login_session['Username'])
-		return render_template('front_page.html', items=items)
+		return render_template('front_page.html', items=items, userlogin=userlogin)
 	except:
-		return render_template('front_page.html', items=items)
+		return render_template('front_page.html', items=items, userlogin=userlogin)
 
 
 @app.route('/Corvus/login', methods = ['GET', 'POST'])
 def Login():
+	userlogin = testlogin()
 	if  request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password']
 		if username is None or password is None:
-			return render_template('Login.html')
+			return render_template('Login.html', userlogin=userlogin)
 		userlogin = session.query(User).filter_by(username=username).first()
 		if not userlogin or not userlogin.verify_password(password):
-			return render_template('Login.html')
+			return render_template('Login.html', userlogin=userlogin)
 		else:
 			token = userlogin.generate_auth_token()
 			login_session['Username'] = username
@@ -55,7 +65,7 @@ def Login():
 	else:
 		state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
 		login_session['state'] = state
-		return render_template('Login.html', STATE=state)
+		return render_template('Login.html', STATE=state, userlogin=userlogin)
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -148,7 +158,7 @@ def gconnect():
     except:
     	user = None
     if not user:
-        Newuser = User(username = login_session['Username'], email = login_session['email'], profilepic = login_session)
+        Newuser = User(username = login_session['Username'], email = login_session['email'], profilepic = login_session['picture'])
         session.add(Newuser)
         session.commit()
         login_session['user_id'] = Newuser.id
@@ -157,15 +167,16 @@ def gconnect():
 
 @app.route('/Corvus/signup', methods = ['GET', 'POST'])
 def Signup():
+	userlogin = testlogin()
 	if request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password']
 		email = request.form['email']
 		if username is None or password is None or email is None:
-			return render_template('Sign_up.html')
+			return render_template('Sign_up.html', userlogin=userlogin)
 
 		if session.query(User).filter_by(username=username).first() is not None:
-			return render_template('Sign_up.html')
+			return render_template('Sign_up.html', userlogin=userlogin)
 
 		user = User(username = username, email = email)
 		user.hash_password(password)
@@ -178,7 +189,7 @@ def Signup():
 		login_session['provider'] = 'Corvus'
 		return redirect(url_for('homepage'))
 	else:
-		return render_template('Sign_up.html')
+		return render_template('Sign_up.html', userlogin=userlogin)
 
 @app.route('/Corvus/Logout')
 def Logout():
@@ -219,7 +230,6 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        # For whatever reason, the given token was invalid.
         response = make_response(
             json.dumps('Failed to revoke token for given user.'), 400)
         response.headers['Content-Type'] = 'application/json'
@@ -234,41 +244,43 @@ def allowed_file(filename):
 
 @app.route('/Corvus/Newitem', methods = ['GET', 'POST'])
 def Newitem():
-	#try:
-	t = login_session['Usertoken']
-	user_id = User.verify_auth_token(t)
-	print(user_id)
-	if request.method == 'POST':
-		if user_id:
-			name = request.form['Name']
-			desc = request.form['description']
-			price = request.form['price']
-			catagory = request.form['catagory']
-			file = request.files['file']
-			if file.filename == '':
+	userlogin = testlogin()
+	try:
+		t = login_session['Usertoken']
+		user_id = User.verify_auth_token(t)
+		print(user_id)
+		if request.method == 'POST':
+			if user_id:
+				name = request.form['Name']
+				desc = request.form['description']
+				price = request.form['price']
+				catagory = request.form['catagory']
+				file = request.files['file']
+				if file.filename == '':
+					return redirect(url_for('Newitem'))
+				if file and allowed_file(file.filename):
+					filename = secure_filename(file.filename)
+					file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+					views = 0
+					newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id, View=views, filename=filename)
+					session.add(newitem)
+					session.commit()
+					print('item added')
+					return redirect(url_for('ViewItem', item_id=newitem.id))
 				return redirect(url_for('Newitem'))
-			if file and allowed_file(file.filename):
-				filename = secure_filename(file.filename)
-				file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-				views = 0
-				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id, View=views, filename=filename)
-				session.add(newitem)
-				session.commit()
-				print('item added')
-				return redirect(url_for('ViewItem', item_id=newitem.id))
-			return redirect(url_for('Newitem'))
-		else: 
-			print('must be logged in')
-			return redirect(url_for('Signup'))
-	else:
-		return render_template('New_item.html')
-	#except:
-		#print('invalid token')
-		#return redirect(url_for('homepage'))
+			else: 
+				print('must be logged in')
+				return redirect(url_for('Signup'))
+		else:
+			return render_template('New_item.html', userlogin=userlogin)
+	except:
+		print('invalid token')
+		return redirect(url_for('homepage'))
 
 
 @app.route('/Corvus/Profile', methods = ['GET', 'POST'])
 def Profile():
+	userlogin = testlogin()
 	try:
 		t = login_session['Usertoken']
 		user_id = User.verify_auth_token(t)
@@ -278,50 +290,53 @@ def Profile():
 			formname = request.form['form-name']
 			if formname == 'form1':
 				user.description = request.form['description']
-				return render_template('Profile.html', items=items, user=user)	
+				return render_template('Profile.html', items=items, user=user, userlogin=userlogin)	
 			elif formname == 'form2':
 				file = request.files['file']
 				if file.filename == '':
-					return render_template('profile.html', items=items, user=user)
+					return render_template('profile.html', items=items, user=user, userlogin=userlogin)
 				if file and allowed_file(file.filename):
 					filename = secure_filename(file.filename)
 					file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 					user.profilepic = filename
-					return render_template('Profile.html', items=items, user=user)	
-		return render_template('Profile.html', items=items, user=user)
+					return render_template('Profile.html', items=items, user=user, userlogin=userlogin)	
+		return render_template('Profile.html', items=items, user=user, userlogin=userlogin)
 	except:
 		return redirect(url_for('Login'))	
 
 
 @app.route('/Corvus/Item/<int:item_id>/')
 def ViewItem(item_id):
+	userlogin = testlogin()
 	item = session.query(CatalogItem).filter_by(id=item_id).one()
 	usersitem = session.query(User).filter_by(id=item.user_id).one()
 	try:
 		t = login_session['Usertoken']
 		user_id = User.verify_auth_token(t)
 		if user_id == item.user_id:
-			return render_template('Owner_item.html', item=item)
+			return render_template('Owner_item.html', item=item, userlogin=userlogin)
 		else:
 			views = item.View
 			views = views + 1
 			item.View = views
-			return render_template('item.html', item=item, useritem=usersitem)
+			return render_template('item.html', item=item, useritem=usersitem, userlogin=userlogin)
 	except:
-		return render_template('item.html', item=item, useritem=usersitem)
+		return render_template('item.html', item=item, useritem=usersitem, userlogin=userlogin)
 
 
 @app.route('/Corvus/catagory/<string:catagory_Type>')
 def ViewCatagory(catagory_Type):
+	userlogin = testlogin()
 	if catagory_Type == 'All products':
 		Ctype = session.query(CatalogItem).all()
 	else:
 		Ctype = session.query(CatalogItem).filter_by(catagory=catagory_Type).all()
-	return render_template('catagory.html', items=Ctype, catagory=catagory_Type)
+	return render_template('catagory.html', items=Ctype, catagory=catagory_Type, userlogin=userlogin)
 
 
 @app.route('/Corvus/Item/<int:item_id>/Edit', methods = ['GET', 'POST'])
 def EditItem(item_id):
+	userlogin = testlogin()
 	edit_item = session.query(CatalogItem).filter_by(id=item_id).one()
 	try:
 		t = login_session['Usertoken']
@@ -335,7 +350,7 @@ def EditItem(item_id):
 					edit_item.description = request.form['description']
 					return redirect(url_for('ViewItem', item_id=edit_item.id))
 			else:
-				return render_template('Edit_item.html', item=edit_item)
+				return render_template('Edit_item.html', item=edit_item, userlogin=userlogin)
 		else:
 			return redirect(url_for('Login'))
 	except:
@@ -344,6 +359,7 @@ def EditItem(item_id):
 
 @app.route('/Corvus/Item/<int:item_id>/Del', methods=["GET", "POST"])
 def DelItem(item_id):
+	userlogin = testlogin()
 	delete_item = session.query(CatalogItem).filter_by(id=item_id).one()
 	try:
 		t = login_session['Usertoken']
@@ -354,7 +370,7 @@ def DelItem(item_id):
 				session.commit()
 				return redirect(url_for('homepage'))
 			else:
-				return render_template('Delete_item.html', item=delete_item)
+				return render_template('Delete_item.html', item=delete_item, userlogin=userlogin)
 		else:
 			return redirect(url_for('Login'))
 	except:
@@ -363,9 +379,10 @@ def DelItem(item_id):
 
 @app.route('/Corvus/User/<int:User_id>')
 def UsersUploads(User_id):
+	userlogin = testlogin()
 	items = session.query(CatalogItem).filter_by(user_id=User_id).all()
 	user = session.query(User).filter_by(id=User_id).one()
-	return render_template('Users_items.html', items=items, user=user)
+	return render_template('Users_items.html', items=items, user=user, userlogin=userlogin)
 
 
 #this was added as i struck a problem with the newitem function so this was there to test the token
