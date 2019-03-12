@@ -27,8 +27,15 @@ session = DBSession()
 
 def testlogin():
 	try:
-		u = login_session['Username']
-		return u 
+		print(login_session['provider'])
+		if login_session['provider'] == 'Corvus':
+			t = login_session['Usertoken']
+			user_id = User.verify_auth_token(t)
+			user = session.query(User).filter_by(id=user_id).one()
+			return user
+		elif login_session['provider'] == 'google':
+			user = session.query(User).filter_by(email=login_session['email']).one()
+			return user
 	except:
 		return None
 
@@ -39,10 +46,12 @@ def homepage():
 	userlogin = testlogin()
 	items = session.query(CatalogItem).order_by(desc(CatalogItem.View)).limit(4).all()
 	try:
-		print(login_session['Username'])
-		return render_template('front_page.html', items=items, userlogin=userlogin)
+		print(userlogin.username)
 	except:
+		print('no user')
+	finally:
 		return render_template('front_page.html', items=items, userlogin=userlogin)
+
 
 
 @app.route('/Corvus/login', methods = ['GET', 'POST'])
@@ -197,6 +206,7 @@ def Logout():
 		if login_session['provider'] == 'Corvus':
 			del login_session['Username']
 			del login_session['Usertoken']
+			del login_session['provider']
 		elif login_session['provider'] == 'google':
 			print('1')
 			gdisconnect()
@@ -225,7 +235,7 @@ def gdisconnect():
         del login_session['Username']
         del login_session['email']
         del login_session['picture']
-
+        del login_session['provider']
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -245,63 +255,52 @@ def allowed_file(filename):
 @app.route('/Corvus/Newitem', methods = ['GET', 'POST'])
 def Newitem():
 	userlogin = testlogin()
-	try:
-		t = login_session['Usertoken']
-		user_id = User.verify_auth_token(t)
-		print(user_id)
+	if userlogin != None:
 		if request.method == 'POST':
-			if user_id:
-				name = request.form['Name']
-				desc = request.form['description']
-				price = request.form['price']
-				catagory = request.form['catagory']
-				file = request.files['file']
-				if file.filename == '':
-					return redirect(url_for('Newitem'))
-				if file and allowed_file(file.filename):
-					filename = secure_filename(file.filename)
-					file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-					views = 0
-					newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = user_id, View=views, filename=filename)
-					session.add(newitem)
-					session.commit()
-					print('item added')
-					return redirect(url_for('ViewItem', item_id=newitem.id))
+			name = request.form['Name']
+			desc = request.form['description']
+			price = request.form['price']
+			catagory = request.form['catagory']
+			file = request.files['file']
+			if file.filename == '':
 				return redirect(url_for('Newitem'))
-			else: 
-				print('must be logged in')
-				return redirect(url_for('Signup'))
+			if file and allowed_file(file.filename):
+				filename = secure_filename(file.filename)
+				file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+				views = 0
+				newitem = CatalogItem(name = name, catagory = catagory, description = desc, price = price, user_id = userlogin.id, View=views, filename=filename)
+				session.add(newitem)
+				session.commit()
+				print('item added')
+				return redirect(url_for('ViewItem', item_id=newitem.id))
+			return redirect(url_for('Newitem'))
 		else:
 			return render_template('New_item.html', userlogin=userlogin)
-	except:
-		print('invalid token')
+	else:
 		return redirect(url_for('homepage'))
 
 
 @app.route('/Corvus/Profile', methods = ['GET', 'POST'])
 def Profile():
 	userlogin = testlogin()
-	try:
-		t = login_session['Usertoken']
-		user_id = User.verify_auth_token(t)
-		items = session.query(CatalogItem).filter_by(user_id=user_id).all()
-		user = session.query(User).filter_by(id=user_id).one()
+	if userlogin != None:
+		items = session.query(CatalogItem).filter_by(user_id=userlogin.id).all()
 		if request.method == 'POST':
 			formname = request.form['form-name']
 			if formname == 'form1':
-				user.description = request.form['description']
-				return render_template('Profile.html', items=items, user=user, userlogin=userlogin)	
+				userlogin.description = request.form['description']
+				return render_template('Profile.html', items=items, user=userlogin, userlogin=userlogin)	
 			elif formname == 'form2':
 				file = request.files['file']
 				if file.filename == '':
-					return render_template('profile.html', items=items, user=user, userlogin=userlogin)
+					return render_template('profile.html', items=items, user=userlogin, userlogin=userlogin)
 				if file and allowed_file(file.filename):
 					filename = secure_filename(file.filename)
 					file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-					user.profilepic = filename
-					return render_template('Profile.html', items=items, user=user, userlogin=userlogin)	
-		return render_template('Profile.html', items=items, user=user, userlogin=userlogin)
-	except:
+					userlogin.profilepic = filename
+					return render_template('Profile.html', items=items, user=userlogin, userlogin=userlogin)	
+		return render_template('Profile.html', items=items, user=userlogin, userlogin=userlogin)
+	else:
 		return redirect(url_for('Login'))	
 
 
@@ -310,17 +309,15 @@ def ViewItem(item_id):
 	userlogin = testlogin()
 	item = session.query(CatalogItem).filter_by(id=item_id).one()
 	usersitem = session.query(User).filter_by(id=item.user_id).one()
-	try:
-		t = login_session['Usertoken']
-		user_id = User.verify_auth_token(t)
-		if user_id == item.user_id:
+	if userlogin != None:
+		if userlogin.id == item.user_id:
 			return render_template('Owner_item.html', item=item, userlogin=userlogin)
 		else:
 			views = item.View
 			views = views + 1
 			item.View = views
 			return render_template('item.html', item=item, useritem=usersitem, userlogin=userlogin)
-	except:
+	else:
 		return render_template('item.html', item=item, useritem=usersitem, userlogin=userlogin)
 
 
@@ -338,10 +335,8 @@ def ViewCatagory(catagory_Type):
 def EditItem(item_id):
 	userlogin = testlogin()
 	edit_item = session.query(CatalogItem).filter_by(id=item_id).one()
-	try:
-		t = login_session['Usertoken']
-		user_id = User.verify_auth_token(t)
-		if user_id == edit_item.user_id:
+	if userlogin != None:
+		if userlogin.id == edit_item.user_id:
 			if request.method == 'POST':
 				if request.form['Name'] and request.form['price'] and request.form['description']:
 					edit_item.name = request.form['Name']
@@ -349,11 +344,13 @@ def EditItem(item_id):
 					edit_item.catagory = request.form['catagory']
 					edit_item.description = request.form['description']
 					return redirect(url_for('ViewItem', item_id=edit_item.id))
+				else:
+					return render_template('Edit_item.html', item=edit_item, userlogin=userlogin)
 			else:
 				return render_template('Edit_item.html', item=edit_item, userlogin=userlogin)
 		else:
 			return redirect(url_for('Login'))
-	except:
+	else:
 		return redirect(url_for('Login'))
 
 
@@ -361,10 +358,8 @@ def EditItem(item_id):
 def DelItem(item_id):
 	userlogin = testlogin()
 	delete_item = session.query(CatalogItem).filter_by(id=item_id).one()
-	try:
-		t = login_session['Usertoken']
-		user_id = User.verify_auth_token(t)
-		if user_id == delete_item.user_id:
+	if userlogin != None:
+		if userlogin.id == delete_item.user_id:
 			if request.method == 'POST':
 				session.delete(delete_item)
 				session.commit()
@@ -373,7 +368,7 @@ def DelItem(item_id):
 				return render_template('Delete_item.html', item=delete_item, userlogin=userlogin)
 		else:
 			return redirect(url_for('Login'))
-	except:
+	else:
 		return redirect(url_for('Login'))
 
 
@@ -402,6 +397,17 @@ def ItemJSON(item_id):
 def ItemsJSON():
 	items = session.query(CatalogItem).all()
 	return jsonify(items=[i.serialize for i in items])
+
+
+@app.route('/fdc')
+def ForeDC():
+	del login_session['access_token']
+	del login_session['gplus_id']
+	del login_session['Username']
+	del login_session['email']
+	del login_session['picture']
+	del login_session['provider']
+	return redirect(url_for('homepage'))
 
 
 if __name__ == '__main__':
