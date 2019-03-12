@@ -17,7 +17,7 @@
                 <div class="modal-body mx-3">
                   <div class="md-form mb-5">
                       <i class="fas fa-envelope prefix grey-text"></i>
-                      <label for="Desc">Profile pic:</label>
+                      <label for="profilepic">Profile pic:</label>
                       <p><input type=file name=file>
                     </div>
                   </div>
@@ -37,7 +37,9 @@
       </a>
 		</div>	
 		<div class="row">
-			<h4>{{user.username}}</h4>
+      <div class="col">
+			 <h4>{{user.username}}</h4>
+      </div>
 		</div>
 	</div>
 </div>
@@ -73,8 +75,8 @@
 <div class="text-center">
   <a href="" class="btn btn-default btn-rounded mb-4" data-toggle="modal" data-target="#modalDescUpdate">update description</a>
 </div>
-<hr>
 {% for item in items %}
+<hr>
 <a href="{{url_for('ViewItem', catagory=catagory, item_id=item.id)}}">
 	<div class="row">
 		<div class="col-6">{{item.name}}</div>

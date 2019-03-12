@@ -1,5 +1,5 @@
 .padding-top {
-	padding-top: 90px;
+	padding-top: 80px;
 }
 
 .mrg-bot {
@@ -37,4 +37,31 @@
 .item-image {
 	width: 200px;
 	height: 200px;
+}
+
+.signup-button-margin {
+	margin-top: 30px;
+	margin-left: calc(50% - 51.775px);
+	margin-right: calc(50% - 51.775px);
+}
+
+.login-button-margin {
+	margin-top: 30px;
+	margin-left: calc(50% - 41.54px);
+	margin-right: calc(50% - 41.54px);
+}
+
+.google-button-margin {
+	margin-top: 30px;
+	margin-left: calc(50% - 79.225px);
+	margin-right: calc(50% - 79.225px);
+}
+
+.delete-button {
+	margin-left: calc(50% - 31.125px);
+	margin-right: calc(50% - 31.125px);
+}
+
+.Corvus {
+	margin-left: 70px;
 }

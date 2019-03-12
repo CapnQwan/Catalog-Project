@@ -21,8 +21,8 @@
 	</div>
 	<div class="row">
 		<div class="col">
-			<label for="exampleFormControlSelect1">Catagory:</label>
-		    <select class="form-control" id="exampleFormControlSelect1" name="catagory">
+			<label for="catagory">Catagory:</label>
+		    <select class="form-control" id="catagory select" name="catagory">
 		      	<option value="Motherboards">Motherboards</option>
 		      	<option value="CPUs">CPUs</option>
 		      	<option value="RAM">RAM</option>
@@ -37,10 +37,15 @@
 		    </select>
 		</div>
 	</div>
-	      <p><input type=file name=file>
-	<div class="row ten-mrg-top">
+	<div class="row">
 		<div class="col">
-			<button type="submit" class="btn btn-primary">Submit</button>
+			<label for="item picture">Item Picture:</label>
+			<p><input type=file name=file >
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<button type="submit" class="btn btn-dark">Submit</button>
 		</div>
 	</div>
 </form>

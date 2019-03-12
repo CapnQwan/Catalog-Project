@@ -6,12 +6,19 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-6">{{item.name}}</div>
-	<div class="col-6">$ {{item.price}}</div>
+	<div class="col-6"><h3>{{item.name}}</h3></div>
+	<div class="col-6"><h3>$ {{item.price}}</h3></div>
+</div>
+<hr>
+<div class="row">
+	<div class="col">
+		<h5>Description:</h5>
+	</div>
 </div>
 <div class="row">
 	<div class="col">{{item.description}}</div>
 </div>
+<hr>
 <div class="row">
 	<div class="col-6"><a href="/Corvus/Item/{{item.id}}/Edit">Edit</a></div>
 	<div class="col-6"><a href="/Corvus/Item/{{item.id}}/Del">Delete</a></div>

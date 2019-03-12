@@ -53,7 +53,6 @@ def homepage():
 		return render_template('front_page.html', items=items, userlogin=userlogin)
 
 
-
 @app.route('/Corvus/login', methods = ['GET', 'POST'])
 def Login():
 	userlogin = testlogin()
@@ -170,8 +169,15 @@ def gconnect():
         Newuser = User(username = login_session['Username'], email = login_session['email'], profilepic = login_session['picture'])
         session.add(Newuser)
         session.commit()
-        login_session['user_id'] = Newuser.id
-    return redirect(url_for('homepage'))
+    	login_session['user_id'] = Newuser.id
+    output = ''
+    output += '<h1>Welcome, '
+    output += login_session['Username']
+    output += '!</h1>'
+    output += '<img src="'
+    output += login_session['picture']
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    return output
 
 
 @app.route('/Corvus/signup', methods = ['GET', 'POST'])
@@ -251,7 +257,6 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-
 @app.route('/Corvus/Newitem', methods = ['GET', 'POST'])
 def Newitem():
 	userlogin = testlogin()
@@ -289,6 +294,8 @@ def Profile():
 			formname = request.form['form-name']
 			if formname == 'form1':
 				userlogin.description = request.form['description']
+				session.add(userlogin)
+				session.commit()
 				return render_template('Profile.html', items=items, user=userlogin, userlogin=userlogin)	
 			elif formname == 'form2':
 				file = request.files['file']
@@ -298,6 +305,8 @@ def Profile():
 					filename = secure_filename(file.filename)
 					file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 					userlogin.profilepic = filename
+					session.add(userlogin)
+					session.commit()
 					return render_template('Profile.html', items=items, user=userlogin, userlogin=userlogin)	
 		return render_template('Profile.html', items=items, user=userlogin, userlogin=userlogin)
 	else:
@@ -343,7 +352,18 @@ def EditItem(item_id):
 					edit_item.price = request.form['price']
 					edit_item.catagory = request.form['catagory']
 					edit_item.description = request.form['description']
-					return redirect(url_for('ViewItem', item_id=edit_item.id))
+					file = request.files['file']
+					if file.filename == '':
+						return redirect(url_for('Newitem'))
+					if file and allowed_file(file.filename):
+						filename = secure_filename(file.filename)
+						file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+						edit_item.filename = filename
+						session.add(edit_item)
+						session.commit()
+						return redirect(url_for('ViewItem', item_id=edit_item.id))
+					else:
+						return render_template('Edit_item.html', item=edit_item, userlogin=userlogin)
 				else:
 					return render_template('Edit_item.html', item=edit_item, userlogin=userlogin)
 			else:
