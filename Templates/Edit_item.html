@@ -4,25 +4,25 @@
 	<div class="row padding-top">
 		<div class="col">
 			<label for="name">Name:</label>
-			<input type ="text" maxlength="40" class="form-control" name="Name" placeholder="{{item.name}}">
+			<input id="name" type ="text" maxlength="40" class="form-control" name="Name" placeholder="{{item.name}}">
 		</div>
 	</div>
 	<div class="row">
 		<div class="col">
 			<label for="Desc">Description:</label>
-			<textarea class="form-control" name="description">{{item.description}}</textarea>
+			<textarea id="Desc" class="form-control" name="description">{{item.description}}</textarea>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col">
 			<label for="Price">Price:</label>
-			<input type ="text" maxlength="12" class="form-control" name="price" placeholder="{{item.price}}">
+			<input id="Price" type ="text" maxlength="12" class="form-control" name="price" placeholder="{{item.price}}">
 		</div>
 	</div>
 	<div class="row">
 		<div class="col">
-			<label for="exampleFormControlSelect1">Catagory:</label>
-		    <select class="form-control" id="exampleFormControlSelect1" name="catagory">
+			<label for="catagory">Catagory:</label>
+		    <select class="form-control" id="catagory" name="catagory">
 		      	<option value="Motherboards">Motherboards</option>
 		      	<option value="CPUs">CPUs</option>
 		      	<option value="RAM">RAM</option>
@@ -39,8 +39,8 @@
 	</div>
 	<div class="row">
 		<div class="col">
-			<label for="item picture">Item Picture:</label>
-			<p><input type=file name=file >
+			<label for="item-picture">Item Picture:</label>
+			<p><input id="item-picture" type=file name=file >
 		</div>
 	</div>
 	<div class="row">

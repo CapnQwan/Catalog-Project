@@ -18,7 +18,7 @@
                   <div class="md-form mb-5">
                       <i class="fas fa-envelope prefix grey-text"></i>
                       <label for="profilepic">Profile pic:</label>
-                      <p><input type=file name=file>
+                      <p><input id="profilepic" type=file name=file>
                     </div>
                   </div>
                   <div class="modal-footer d-flex justify-content-center">
@@ -30,9 +30,9 @@
       </div>
       <a href="" class="btn btn-default btn-rounded mb-4" data-toggle="modal" data-target="#modalProfilePic">
 		    {% if user.profilepic == None %}
-				  <img class="Profile-picture" src="/static/images/profile-placeholder.png">
+				  <img class="Profile-picture" src="/static/images/profile-placeholder.png" alt="default profile picture">
 		    {% else %}
-				  <img class="Profile-picture" src="/static/Upload images/{{user.profilepic}}">
+				  <img class="Profile-picture" src="/static/Upload images/{{user.profilepic}}" alt="users profile picture">
 		    {% endif %}
       </a>
 		</div>	
@@ -62,7 +62,7 @@
   				<div class="md-form mb-5">
        			<i class="fas fa-envelope prefix grey-text"></i>
       			<label for="Desc">Description:</label>
-					  <textarea class="form-control" name="description">Description</textarea>
+					  <textarea id="Desc" class="form-control" name="description">Description</textarea>
       		</div>
     		</div>
     		<div class="modal-footer d-flex justify-content-center">

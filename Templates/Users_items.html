@@ -3,9 +3,9 @@
 <div class="row padding-top">
 	<div class="col">
 		{% if user.profilepic == None %}
-			  <img class="Profile-picture" src="/static/images/profile-placeholder.png">
+			  <img class="Profile-picture" src="/static/images/profile-placeholder.png" alt="base profile picture">
 	    {% else %}
-			  <img class="Profile-picture" src="/static/Upload images/{{user.profilepic}}">
+			  <img class="Profile-picture" src="/static/Upload images/{{user.profilepic}}" alt="Users profile picture">
 	    {% endif %}
 	</div>
 </div>
