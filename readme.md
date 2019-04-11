@@ -29,4 +29,5 @@ some code from:
 
 ToDo:
 
-add flash statments 
+add flash statments
+add responiveness for mobile and table devies
